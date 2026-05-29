@@ -1,6 +1,11 @@
 # Boilerplate Golang Modular Monolith Clean Architecture
 
+[![Go Version](https://img.shields.io/badge/Go-1.26-blue.svg)](https://golang.org)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Docker%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://docker.com)
+
 [English README](README.md) | [Tiếng Việt](README_VI.md) | [Concurrency Guide (EN)](CONCURRENCY.md) | [Hướng Dẫn Concurrency (VI)](CONCURRENCY_VI.md)
+
 
 Tài liệu này cung cấp hướng dẫn chi tiết về cấu trúc, thiết lập và vận hành một Boilerplate Golang cấp Senior/Tech Lead. Dự án sử dụng phiên bản Go 1.26, triển khai theo mô hình Modular Monolith kết hợp kiến trúc Clean Architecture và các nguyên lý SOLID một cách nghiêm ngặt, giúp dễ dàng chia tách thành các dịch vụ microservices trong tương lai với thay đổi tối thiểu ở tầng logic nghiệp vụ.
 

@@ -1,6 +1,11 @@
 # Golang Modular Monolith Clean Architecture Boilerplate
 
+[![Go Version](https://img.shields.io/badge/Go-1.26-blue.svg)](https://golang.org)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Docker%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://docker.com)
+
 [English README](README.md) | [Tiếng Việt](README_VI.md) | [Concurrency Guide (EN)](CONCURRENCY.md) | [Hướng Dẫn Concurrency (VI)](CONCURRENCY_VI.md)
+
 
 This boilerplate provides a senior-grade, production-ready foundation designed for high-performance scale and rapid development. Built using Go 1.26, it implements a highly-decoupled Modular Monolith layout aligned strictly with Clean Architecture and SOLID principles, enabling painless transitions to microservices in the future.
 
