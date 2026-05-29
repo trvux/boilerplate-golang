@@ -7,90 +7,121 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/spf13/viper"
 )
 
 type Config struct {
-	App      AppConfig      `mapstructure:"app"`
-	Server   ServerConfig   `mapstructure:"server"`
-	Database DatabaseConfig `mapstructure:"database"`
-	Redis    RedisConfig    `mapstructure:"redis"`
-	Kafka    KafkaConfig    `mapstructure:"kafka"`
+	App      AppConfig
+	Server   ServerConfig
+	Database DatabaseConfig
+	Redis    RedisConfig
+	Kafka    KafkaConfig
 }
 
 type AppConfig struct {
-	Env  string `mapstructure:"env"`
-	Name string `mapstructure:"name"`
+	Env  string
+	Name string
 }
 
 type ServerConfig struct {
-	Host           string        `mapstructure:"host"`
-	Port           int           `mapstructure:"port"`
-	TimeoutSeconds time.Duration `mapstructure:"timeout_seconds"`
+	Host           string
+	Port           int
+	TimeoutSeconds time.Duration
 }
 
 type DatabaseConfig struct {
-	Host                   string `mapstructure:"host"`
-	Port                   int    `mapstructure:"port"`
-	User                   string `mapstructure:"user"`
-	Password               string `mapstructure:"password"`
-	DBName                 string `mapstructure:"dbname"`
-	SSLMode                string `mapstructure:"ssl_mode"`
-	MaxOpenConns           int    `mapstructure:"max_open_conns"`
-	MaxIdleConns           int    `mapstructure:"max_idle_conns"`
-	ConnMaxLifetimeMinutes int    `mapstructure:"conn_max_lifetime_minutes"`
+	Host                   string
+	Port                   int
+	User                   string
+	Password               string
+	DBName                 string
+	SSLMode                string
+	MaxOpenConns           int
+	MaxIdleConns           int
+	ConnMaxLifetimeMinutes int
 }
 
 type RedisConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Password string `mapstructure:"password"`
-	DB       int    `mapstructure:"db"`
+	Host     string
+	Port     int
+	Password string
+	DB       int
 }
 
 type KafkaConfig struct {
-	Brokers  []string `mapstructure:"brokers"`
-	ClientID string   `mapstructure:"client_id"`
-	GroupID  string   `mapstructure:"group_id"`
+	Brokers  []string
+	ClientID string
+	GroupID  string
+}
+
+func getEnv(key, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
+}
+
+func getEnvInt(key string, defaultValue int) int {
+	valueStr := getEnv(key, "")
+	if valueStr == "" {
+		return defaultValue
+	}
+	var val int
+	_, err := fmt.Sscanf(valueStr, "%d", &val)
+	if err != nil {
+		return defaultValue
+	}
+	return val
+}
+
+func getEnvSlice(key string, defaultValue []string) []string {
+	valueStr := getEnv(key, "")
+	if valueStr == "" {
+		return defaultValue
+	}
+	parts := strings.Split(valueStr, ",")
+	for i := range parts {
+		parts[i] = strings.TrimSpace(parts[i])
+	}
+	return parts
 }
 
 func LoadConfig() (*Config, error) {
 	// Load .env file if present (useful for local development overrides)
-	// We ignore the error because in production/staging environments, variables
-	// are injected directly into the container OS environment instead of a file.
 	_ = godotenv.Load()
 
-	v := viper.New()
-
-	v.SetConfigName("config")
-	v.SetConfigType("yaml")
-
-	// Standard lookup paths
-	v.AddConfigPath("./config")
-	v.AddConfigPath("../config")
-	v.AddConfigPath("../../config")
-	v.AddConfigPath(".")
-
-	// Support custom config path via environment variable
-	if customPath := os.Getenv("CONFIG_PATH"); customPath != "" {
-		v.SetConfigFile(customPath)
+	cfg := &Config{
+		App: AppConfig{
+			Env:  getEnv("APP_ENV", "development"),
+			Name: getEnv("APP_NAME", "boilerplate-golang"),
+		},
+		Server: ServerConfig{
+			Host:           getEnv("SERVER_HOST", "0.0.0.0"),
+			Port:           getEnvInt("SERVER_PORT", 8080),
+			TimeoutSeconds: time.Duration(getEnvInt("SERVER_TIMEOUT_SECONDS", 30)) * time.Second,
+		},
+		Database: DatabaseConfig{
+			Host:                   getEnv("DATABASE_HOST", "localhost"),
+			Port:                   getEnvInt("DATABASE_PORT", 5432),
+			User:                   getEnv("DATABASE_USER", "postgres"),
+			Password:               getEnv("DATABASE_PASSWORD", "password"),
+			DBName:                 getEnv("DATABASE_DBNAME", "boilerplate_db"),
+			SSLMode:                getEnv("DATABASE_SSL_MODE", "disable"),
+			MaxOpenConns:           getEnvInt("DATABASE_MAX_OPEN_CONNS", 100),
+			MaxIdleConns:           getEnvInt("DATABASE_MAX_IDLE_CONNS", 10),
+			ConnMaxLifetimeMinutes: getEnvInt("DATABASE_CONN_MAX_LIFETIME_MINUTES", 30),
+		},
+		Redis: RedisConfig{
+			Host:     getEnv("REDIS_HOST", "localhost"),
+			Port:     getEnvInt("REDIS_PORT", 6379),
+			Password: getEnv("REDIS_PASSWORD", ""),
+			DB:       getEnvInt("REDIS_DB", 0),
+		},
+		Kafka: KafkaConfig{
+			Brokers:  getEnvSlice("KAFKA_BROKERS", []string{"localhost:9092"}),
+			ClientID: getEnv("KAFKA_CLIENT_ID", "boilerplate-golang-client"),
+			GroupID:  getEnv("KAFKA_GROUP_ID", "boilerplate-golang-group"),
+		},
 	}
 
-	// Environment variable overrides
-	// e.g. DATABASE_PASSWORD mapped to database.password
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	v.AutomaticEnv()
-
-	if err := v.ReadInConfig(); err != nil {
-		// It's acceptable to not find a config file if environment variables are fully configured,
-		// but since it's a boilerplate, we require the config file by default.
-		return nil, fmt.Errorf("failed to read config file: %w", err)
-	}
-
-	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
-	}
-
-	return &cfg, nil
+	return cfg, nil
 }

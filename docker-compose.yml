@@ -73,7 +73,6 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      - CONFIG_PATH=config/config.yaml
       - DATABASE_HOST=postgres
       - REDIS_HOST=redis
       - KAFKA_BROKERS=kafka:29092

@@ -30,9 +30,6 @@ RUN apk add --no-cache ca-certificates tzdata
 
 WORKDIR /home/appuser
 
-# Copy config files
-COPY --chown=appuser:appgroup config/config.yaml ./config/config.yaml
-
 # Copy static binary from builder
 COPY --from=builder --chown=appuser:appgroup /app/server ./server
 

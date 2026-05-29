@@ -20,7 +20,7 @@ Các công nghệ và cơ chế cốt lõi được tích hợp:
 - Trình ghi log cấu trúc: Uber Zap
 - Quản lý lỗi: Phân cấp lỗi Domain và dịch lỗi tập trung (Error Translator)
 - Theo vết yêu cầu: Middleware Request ID tự động lan truyền
-- Môi trường cấu hình: Viper kết hợp nạp file .env tự động (qua godotenv)
+- Môi trường cấu hình: Quản lý qua biến môi trường hệ thống kết hợp nạp file .env tự động (qua godotenv)
 
 ---
 
@@ -54,8 +54,6 @@ Chú thích: (I) đại diện cho Interface (Trừu tượng), và (Impl) đạ
 ├── cmd/
 │   └── server/
 │       └── main.go         # Điểm khởi chạy ứng dụng (nạp cấu hình, chạy migration, graceful shutdown)
-├── config/
-│   └── config.yaml         # File lưu trữ các tham số cấu hình mặc định dạng YAML
 ├── database/
 │   ├── migrations/         # Thư mục lưu trữ các file script SQL migration dạng Goose
 │   └── migrations.go       # File nhúng SQL script vào mã nguồn biên dịch bằng go:embed
@@ -72,7 +70,7 @@ Chú thích: (I) đại diện cho Interface (Trừu tượng), và (Impl) đạ
 │           └── usecase/    # Tầng xử lý luồng nghiệp vụ (Business logic)
 ├── pkg/
 │   ├── apperr/             # Khai báo cấu trúc lỗi Domain tập trung
-│   ├── config/             # Bộ nạp cấu hình Viper kết hợp godotenv nạp đè biến môi trường
+│   ├── config/             # Bộ nạp cấu hình trực tiếp từ biến môi trường với godotenv dự phòng
 │   ├── database/           # Bộ kết nối PostgreSQL, Redis và các hàm kiểm tra kết nối (ping/health)
 │   ├── logger/             # Trình ghi log Zap cấu trúc cao cấp
 │   ├── messaging/          # Bộ bọc thư viện Kafka Producer/Consumer (segmentio)
@@ -87,16 +85,10 @@ Chú thích: (I) đại diện cho Interface (Trừu tượng), và (Impl) đạ
 
 ## Quản Lý Cấu Hình Và Biến Môi Trường
 
-Hệ thống cấu hình sử dụng cơ chế nạp đè 3 lớp linh hoạt thông qua thư viện Viper:
+Hệ thống nạp cấu hình linh hoạt theo thứ tự ưu tiên:
 1. Biến môi trường hệ thống (OS Environment Variables) có quyền ưu tiên cao nhất.
 2. File cấu hình `.env` cục bộ (chỉ sử dụng khi chạy local và không được commit lên Git).
-3. Các cấu hình mặc định trong file `config/config.yaml`.
-
-### Quy tắc đặt tên biến môi trường nạp đè
-Để ghi đè các cấu hình phân cấp trong YAML bằng biến môi trường hệ thống, bạn chỉ cần thay thế dấu chấm `.` bằng dấu gạch dưới `_`.
-Ví dụ:
-- `database.password` trong YAML tương ứng với biến môi trường `DATABASE_PASSWORD`.
-- `kafka.brokers` trong YAML tương ứng với biến môi trường `KAFKA_BROKERS`.
+3. Các cấu hình mặc định được gán trực tiếp (fallback defaults) trong mã nguồn Go (không cần file cấu hình ngoài).
 
 Xem danh sách đầy đủ các biến cấu hình tại `.env.example`.
 
@@ -153,7 +145,7 @@ Bước 2: Nhân bản file cấu hình biến môi trường cục bộ:
 ```bash
 cp .env.example .env
 ```
-Lưu ý: Nếu thông tin kết nối dịch vụ local của bạn khác biệt so với file mẫu `.env.example`, bạn chỉ cần chỉnh sửa trực tiếp các thông số này trong file `.env` vừa tạo. File `.env` này sẽ được nạp tự động bằng `godotenv` lúc app bắt đầu chạy và nạp đè lên các tham số của `config.yaml`.
+Lưu ý: Nếu thông tin kết nối dịch vụ local của bạn khác biệt so với file mẫu `.env.example`, bạn chỉ cần chỉnh sửa trực tiếp các thông số này trong file `.env` vừa tạo. File `.env` này sẽ được nạp tự động bằng `godotenv` lúc app bắt đầu chạy và nạp đè lên các giá trị cấu hình mặc định.
 
 Bước 3: Tải thư viện phụ thuộc và khởi chạy ứng dụng Go:
 ```bash

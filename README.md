@@ -20,7 +20,7 @@ Included Out-of-the-Box:
 - Structured logging: Uber Zap
 - Error Management: Centralized Domain error mapping
 - Tracing: Request ID propagation middleware
-- Environments: Viper configuration with .env file support (via godotenv)
+- Environments: Configuration management via standard environment variables (with .env file support using godotenv)
 
 ---
 
@@ -54,8 +54,6 @@ Note: (I) represents an Interface, and (Impl) represents the physical structural
 ├── cmd/
 │   └── server/
 │       └── main.go         # Application entrypoint (bootstrap, signals, graceful shutdown)
-├── config/
-│   └── config.yaml         # Configuration file with default key values
 ├── database/
 │   ├── migrations/         # Plain SQL database migration scripts (Goose format)
 │   └── migrations.go       # Compiled binary SQL file embedder using go:embed
@@ -72,7 +70,7 @@ Note: (I) represents an Interface, and (Impl) represents the physical structural
 │           └── usecase/    # Domain Business Logic implementations
 ├── pkg/
 │   ├── apperr/             # Structured Domain Errors
-│   ├── config/             # Config parser using Viper with godotenv overrides
+│   ├── config/             # Config loader using standard env variables with godotenv fallback defaults
 │   ├── database/           # Postgres & Redis connectors and health check routines
 │   ├── logger/             # High performance structured logger wrapper around Zap
 │   ├── messaging/          # Kafka Producer/Consumer wrappers (segmentio)
@@ -87,16 +85,10 @@ Note: (I) represents an Interface, and (Impl) represents the physical structural
 
 ## Configuration and Environments
 
-The boilerplate uses a hybrid configuration management system. Viper loads configurations in the following priority order:
+The boilerplate loads configurations dynamically in the following priority order:
 1. Environment variables (OS system level)
 2. Local `.env` file (loaded via `godotenv` on startup, useful for local developer overrides)
-3. Default `config/config.yaml` file
-
-### Overriding Settings via Environment Variables
-Environment variables override YAML settings automatically. Simply map the nested path using underscores.
-Example:
-- `database.password` in YAML becomes `DATABASE_PASSWORD` as an environment variable.
-- `kafka.brokers` in YAML becomes `KAFKA_BROKERS` as an environment variable.
+3. Safe default fallback values hardcoded in the Go source code (no external configuration files required)
 
 A complete list of options can be found inside `.env.example`.
 

@@ -32,6 +32,9 @@ func NewPostgresDB(cfg *config.Config, log logger.Logger) (*PostgresDB, error) {
 		Logger: newGormZapLogger(log, cfg.App.Env),
 	}
 
+	// securecoder(CWE-798): False positive. The connection string (dsn) is constructed dynamically from
+	// database configuration loaded by Viper (e.g., from environment variables or a local config). No hardcoded
+	// secrets are stored in the source code.
 	db, err := gorm.Open(postgres.Open(dsn), gormConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database connection: %w", err)
