@@ -190,6 +190,26 @@ Nếu bạn muốn tắt hoàn toàn Redis và Kafka để tiết kiệm tài ng
    ```
    Ứng dụng Go khi khởi động sẽ tự nhận diện việc thiếu hụt Redis/Kafka, bỏ qua một cách an toàn và vận hành trơn tru với duy nhất PostgreSQL.
 
+### Bộ Lệnh Makefile Tiện Ích
+
+Một tệp `Makefile` tự động biên dịch và tạo hướng dẫn tích hợp sẵn để tối ưu hóa toàn bộ quá trình phát triển, kiểm thử và vận hành Docker Compose cho nhóm làm việc.
+
+Chạy lệnh sau tại thư mục gốc để hiển thị toàn bộ hướng dẫn sử dụng:
+```bash
+make help
+```
+
+#### Các lệnh chính được hỗ trợ:
+- `make run`: Khởi chạy ứng dụng Go local ở chế độ phát triển (Development).
+- `make build`: Biên dịch mã nguồn tối ưu thành file nhị phân chạy production (tĩnh, lược bỏ symbols).
+- `make test`: Chạy toàn bộ các bài kiểm thử unit tests của dự án.
+- `make test-race`: Chạy toàn bộ unit tests kết hợp cờ kiểm tra lỗi xung đột luồng (`go test -race`).
+- `make docker-up`: Khởi chạy toàn bộ hạ tầng (Postgres, Redis, Kafka) và ứng dụng Go bằng Docker Compose.
+- `make docker-down`: Dừng toàn bộ các container đang chạy và xóa sạch dữ liệu bộ đệm (volumes).
+- `make wire`: Tự động sinh mã nguồn giải quyết Dependency Injection qua Google Wire.
+- `make migrate-create name=ten_migration`: Tạo nhanh một file SQL migration mới định dạng Goose trong thư mục `database/migrations/` gắn nhãn thời gian tự động.
+- `make clean`: Dọn dẹp các tệp nhị phân biên dịch thừa và xóa bộ nhớ đệm cache kiểm thử local.
+
 ---
 
 ## Các Cơ Chế Kỹ Thuật Đặc Thù

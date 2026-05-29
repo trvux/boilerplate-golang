@@ -170,6 +170,26 @@ If you want to disable Redis and Kafka to save local compute resources, perform 
    ```
    The application container will launch instantly with only PostgreSQL running, gracefully bypassing the optional Redis and Kafka subsystems on startup.
 
+### Makefile Utilities
+
+A pre-configured self-documenting `Makefile` is included to streamline all development, testing, and Docker operations.
+
+Run the following command at the project root to view all available commands:
+```bash
+make help
+```
+
+#### Available Commands:
+- `make run`: Starts the Go application locally in development mode.
+- `make build`: Compiles the optimized static production binary.
+- `make test`: Runs all unit tests.
+- `make test-race`: Runs all unit tests with Go data race detector enabled.
+- `make docker-up`: Boots up all infrastructure (Postgres, Redis, Kafka) and the application via Docker Compose.
+- `make docker-down`: Stops all container services and purges local volumes.
+- `make wire`: Generates Google Wire dependency injection code inside `internal/app`.
+- `make migrate-create name=migration_name`: Creates a new formatted SQL migration file inside `database/migrations/` using timestamp prefixing.
+- `make clean`: Removes binary artifacts and clears Go test caches.
+
 ---
 
 ## Core Operational Mechanics
